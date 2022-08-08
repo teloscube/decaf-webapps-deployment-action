@@ -1,7 +1,8 @@
 name: "DECAF Webapps Deployment"
 description: "Deploys DECAF Web Apps"
-icon: "arrow-up-right"
-color: "orange"
+branding:
+  icon: "arrow-up-right"
+  color: "orange"
 outputs:
   segment:
     description: "The segment of the deployment"
