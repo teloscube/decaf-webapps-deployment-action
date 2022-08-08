@@ -1,0 +1,49 @@
+name: "DECAF Webapps Deployment"
+description: "Deploys DECAF Web Apps"
+outputs:
+  segment:
+    description: "The segment of the deployment"
+    value: ${{steps.build.outputs.segment}}'
+  urlpath:
+    description: "The path of the deployment"
+    value: ${{steps.build.outputs.urlpath}}'
+  outpath:
+    description: "The path of the deployment"
+    value: ${{steps.build.outputs.outpath}}'
+runs:
+  using: "composite"
+  steps:
+    - name: Install
+      run: yarn install --frozen-lockfile
+      env:
+        HUSKY: 0
+      shell: bash
+
+    - name: Build
+      id: build
+      run: sh ci-build.sh
+      shell: bash
+
+    - name: Deploy
+      uses: Burnett01/rsync-deployments@4.1
+      with:
+        switches: -avzr --delete --rsync-path='mkdir -p /data/websites/${{secrets.DEPLOY_HOST}}/htdocs/${{steps.vars.outputs.urlpath}} && rsync'
+        path: ${{steps.vars.outputs.outpath}}
+        remote_path: /data/websites/${{secrets.DEPLOY_HOST}}/htdocs/${{steps.vars.outputs.urlpath}}/
+        remote_host: ${{secrets.DEPLOY_HOST}}
+        remote_user: ${{secrets.DEPLOY_USER}}
+        remote_key: ${{secrets.DEPLOY_KEY}}
+
+    - name: "Comment on PR"
+      uses: actions/github-script@0.3.0
+      env:
+        DEPLOY_URL: https://telosinvest.decafhub.com${{steps.vars.outputs.urlpath}}
+      if: ${{ github.event_name == 'pull_request' && (github.event.action == 'opened' || github.event.action == 'reopened') }}
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        script: |
+          const {
+            issue: { number: issue_number },
+            repo: { owner, repo },
+          } = context;
+          github.issues.createComment({ issue_number, owner, repo, body: `🚀  Deploy Preview: ${process.env.DEPLOY_URL}` });
