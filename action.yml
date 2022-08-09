@@ -3,24 +3,26 @@ description: "Deploys DECAF Web Apps"
 branding:
   icon: "arrow-up-right"
   color: "orange"
+inputs:
+  segment:
+    description: "Segment to deployment (E.g: production, staging, v0.1.0)"
+    required: true
 outputs:
   segment:
     description: "The segment of the deployment"
     value: ${{steps.build.outputs.segment}}'
   urlpath:
-    description: "The path of the deployment"
+    description: "The path of the remote folder"
     value: ${{steps.build.outputs.urlpath}}'
   outpath:
-    description: "The path of the deployment"
+    description: "The path of the built app"
     value: ${{steps.build.outputs.outpath}}'
+  PUBLIC_URL:
+    description: "PUBLIC URL for react apps"
+    value: ${{steps.build.outputs.PUBLIC_URL}}'
 runs:
   using: "composite"
   steps:
-    - name: Install
-      run: yarn install --frozen-lockfile
-      env:
-        HUSKY: 0
-      shell: bash
 
     - name: Build
       id: build
@@ -30,9 +32,9 @@ runs:
     - name: Deploy
       uses: Burnett01/rsync-deployments@4.1
       with:
-        switches: -avzr --delete --rsync-path='mkdir -p /data/websites/${{secrets.DEPLOY_HOST}}/htdocs/${{steps.vars.outputs.urlpath}} && rsync'
-        path: ${{steps.vars.outputs.outpath}}
-        remote_path: /data/websites/${{secrets.DEPLOY_HOST}}/htdocs/${{steps.vars.outputs.urlpath}}/
+        switches: -avzr --delete --rsync-path='mkdir -p /data/websites/${{secrets.DEPLOY_HOST}}/htdocs/${{steps.build.outputs.urlpath}} && rsync'
+        path: ${{steps.build.outputs.outpath}}
+        remote_path: /data/websites/${{secrets.DEPLOY_HOST}}/htdocs/${{steps.build.outputs.urlpath}}/
         remote_host: ${{secrets.DEPLOY_HOST}}
         remote_user: ${{secrets.DEPLOY_USER}}
         remote_key: ${{secrets.DEPLOY_KEY}}
@@ -40,7 +42,7 @@ runs:
     - name: "Comment on PR"
       uses: actions/github-script@0.3.0
       env:
-        DEPLOY_URL: https://telosinvest.decafhub.com${{steps.vars.outputs.urlpath}}
+        DEPLOY_URL: https://telosinvest.decafhub.com${{steps.build.outputs.urlpath}}
       if: ${{ github.event_name == 'pull_request' && (github.event.action == 'opened' || github.event.action == 'reopened') }}
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}

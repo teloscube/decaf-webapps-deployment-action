@@ -45,6 +45,8 @@ jobs:
       - name: "Build and Deploy"
         id: build
         uses: actions/decaf-webapps-deployment-action@v1
+        with:
+          segment: production
 ```
 
 ## Outputs
