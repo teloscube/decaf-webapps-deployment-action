@@ -46,21 +46,24 @@ jobs:
         id: build
         uses: actions/decaf-webapps-deployment-action@v1
         with:
-          segment: production
+          app_name: demo-app
+          production: true
+          staging: true
+          preview: true
+          version: v0.1.0
+          remote_host: ${{ secrets.DEPLOY_HOST }}
+          remote_user: ${{ secrets.DEPLOY_USER }}
+          remote_key: ${{ secrets.DEPLOY_KEY }}
 ```
 
 ## Outputs
 
 You can use the following outputs. The values are populated after the action is completed. Normally, you would not need to use these outputs.
 
-- `segment`: The segment of the release type (e.g. `production`, `staging` or `v0.2.1`).
-- `urlpath`: The URL path of the deployed app. (e.g `/webapps/xxx/production`)
-- `outpath`: The full path of the builded app (e.g `dist/webapps/xxx/production`)
+- `urlpaths`: The URL paths of the deployed apps separated by `||`. (e.g `/webapps/xxx/production||/webapps/xxx/staging||/webapps/xxx/preview-42`)
 
 Example usage of the output values (Assuming the id of the step is `build`):
 
 ```yml
-    ${{ steps.build.outputs.segment }}
-    ${{ steps.build.outputs.outpath }}
-    ${{ steps.build.outputs.urlpath }}
+${{ steps.build.outputs.urlpaths }}
 ```

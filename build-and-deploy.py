@@ -1,16 +1,26 @@
+#!/usr/bin/env python3
+
 import argparse
 import os
 import subprocess
 
-# get rid of this when we are ready to read from github secrets
 secrets = {
-    "DEPLOY_HOST": os.environ["DEPLOY_HOST"],
-    "DEPLOY_USER": os.environ["DEPLOY_USER"],
-    "DEPLOY_KEY": os.environ["DEPLOY_KEY"],
+    "DEPLOY_HOST": os.environ["INPUT_REMOTE_HOST"],
+    "DEPLOY_USER": os.environ["INPUT_REMOTE_USER"],
+    "DEPLOY_PORT": os.environ.get("INPUT_REMOTE_PORT", "22"),
 }
 
 
 parser = argparse.ArgumentParser(description="Build and deploy DECAF App")
+
+parser.add_argument(
+    "-n",
+    "--app-name",
+    action="store",
+    help="Name of the app to build",
+    required=True,
+)
+
 parser.add_argument(
     "-s",
     "--segment",
@@ -18,28 +28,28 @@ parser.add_argument(
     help="Segment to build\nE.g: production, staging or v0.1.0",
     required=True,
 )
+
 args = parser.parse_args()
 
 segments = args.segment  # ['production', 'staging', 'v0.0.1']
-
+app_name = args.app_name  # 'some-report-app'
 
 subprocess.run(["yarn", "install"])
-subprocess.run(["yarn", "build"])
+
+deploy_urls = []
 
 for segment in segments:
     print(f"Starting for {segment}...")
     ## Set URL path:
-    url_path = f"/webapps/action-test/{segment}"
+    url_path = f"/webapps/{app_name}/{segment}"
 
     ## Set output path:
     out_path = f"dist{url_path}/"
 
-    ## Set environment variables:
-    os.environ["PUBLIC_URL"] = url_path
-
     print("Building...")
 
     ## Start building:
+    subprocess.run(["yarn", "build"], env={**os.environ, "PUBLIC_URL": url_path})
     subprocess.run(
         f"mkdir -p {out_path} && cp -R build/** {out_path}",
         shell=True,
@@ -57,16 +67,15 @@ for segment in segments:
             "-avzr",
             "--delete",
             f"--rsync-path=mkdir -p {remote_path} && rsync",
-            f"-e ssh -o StrictHostKeyChecking=no -i {secrets['DEPLOY_KEY']}",
+            f"-e ssh -o StrictHostKeyChecking=no -p {secrets['DEPLOY_PORT']}",
             out_path,
             f"{secrets['DEPLOY_USER']}@{secrets['DEPLOY_HOST']}:{remote_path}",
         ]
     )
 
-    ## Set outputs:
-    subprocess.run(["echo", "::set-output", f'name=segment::"{segment}"'])
-    subprocess.run(["echo", "::set-output", f'name=urlpath::"{url_path}"'])
-    subprocess.run(["echo", "::set-output", f'name=outpath::"{out_path}"'])
-    subprocess.run(["echo", "::set-output", f'name=PUBLIC_URL::"{url_path}"'])
+    deploy_urls.append(url_path)
 
-    print("Done!")
+
+## Set url paths:
+print(f"::set-output name=urlpaths::{'||'.join(deploy_urls)}")
+print("Done!")

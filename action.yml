@@ -1,54 +1,76 @@
 name: "DECAF Webapps Deployment"
 description: "Deploys DECAF Web Apps"
+author: "Teloscube Pte Ltd"
 branding:
   icon: "arrow-up-right"
   color: "orange"
 inputs:
-  segment:
-    description: "Segment to deployment (E.g: production, staging, v0.1.0)"
+  app_name:
+    description: "Name of the application and also the folder name where the application is located remotely"
     required: true
-outputs:
-  segment:
-    description: "The segment of the deployment"
-    value: ${{steps.build.outputs.segment}}'
-  urlpath:
-    description: "The path of the remote folder"
-    value: ${{steps.build.outputs.urlpath}}'
-  outpath:
-    description: "The path of the built app"
-    value: ${{steps.build.outputs.outpath}}'
-  PUBLIC_URL:
-    description: "PUBLIC URL for react apps"
-    value: ${{steps.build.outputs.PUBLIC_URL}}'
+  production:
+    description: "Production environment"
+    required: false
+  staging:
+    description: "Staging environment"
+    required: false
+  preview:
+    description: "Deployment from Pull Request"
+    required: false
+  version:
+    description: "Deployment from a tag or version"
+    required: false
+  remote_host:
+    description: 'The remote host'
+    required: true
+  remote_user:
+    description: 'The remote user'
+    required: true
+  remote_key:
+    description: 'The remote key'
+    required: true
+  remote_port:
+    description: 'The remote port'
+    required: false
+    default: 22
 runs:
   using: "composite"
   steps:
+    - uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
 
-    - name: Build
-      id: build
-      run: sh ci-build.sh
+    - name: Install rsync
+      id: install_rsync
+      run: sudo apt-get install -y rsync
       shell: bash
 
-    - name: Deploy
-      uses: Burnett01/rsync-deployments@4.1
-      with:
-        switches: -avzr --delete --rsync-path='mkdir -p /data/websites/${{secrets.DEPLOY_HOST}}/htdocs/${{steps.build.outputs.urlpath}} && rsync'
-        path: ${{steps.build.outputs.outpath}}
-        remote_path: /data/websites/${{secrets.DEPLOY_HOST}}/htdocs/${{steps.build.outputs.urlpath}}/
-        remote_host: ${{secrets.DEPLOY_HOST}}
-        remote_user: ${{secrets.DEPLOY_USER}}
-        remote_key: ${{secrets.DEPLOY_KEY}}
+    - name: Build and Deploy
+      id: build
+      run: ${{ github.action_path }}/run-build-and-deploy.sh
+      shell: bash
+      env:
+        INPUT_APP_NAME: ${{ inputs.app_name }}
+        INPUT_PRODUCTION: ${{ inputs.production }}
+        INPUT_STAGING: ${{ inputs.staging }}
+        INPUT_PREVIEW: ${{ inputs.preview }}
+        INPUT_VERSION: ${{ inputs.version }}
+        INPUT_REMOTE_HOST: ${{ inputs.remote_host }}
+        INPUT_REMOTE_USER: ${{ inputs.remote_user }}
+        INPUT_REMOTE_PORT: ${{ inputs.remote_port }}
+        INPUT_REMOTE_KEY: ${{ inputs.remote_key }}
 
     - name: "Comment on PR"
-      uses: actions/github-script@0.3.0
+      uses: actions/github-script@v6
       env:
-        DEPLOY_URL: https://telosinvest.decafhub.com${{steps.build.outputs.urlpath}}
+        DEPLOY_URLS: ${{steps.build.outputs.urlpaths}}
       if: ${{ github.event_name == 'pull_request' && (github.event.action == 'opened' || github.event.action == 'reopened') }}
       with:
-        github-token: ${{ secrets.GITHUB_TOKEN }}
         script: |
           const {
             issue: { number: issue_number },
             repo: { owner, repo },
           } = context;
-          github.issues.createComment({ issue_number, owner, repo, body: `🚀  Deploy Preview: ${process.env.DEPLOY_URL}` });
+          process.env.DEPLOY_URLS.split('||').forEach(path => {
+            github.rest.issues.createComment({ issue_number, owner, repo, body: `🚀  Deploy Preview: https://sandbox.dev.decafhub.com${path}` });
+          });
