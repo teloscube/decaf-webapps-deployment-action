@@ -7,7 +7,12 @@ set -x
 eval "$(ssh-agent -s)"
 echo "$INPUT_REMOTE_KEY" | tr -d '\r' | ssh-add -
 
-_args=("-n" "${INPUT_APP_NAME}")
+_args=(
+    "-H" "${INPUT_REMOTE_HOST}"
+    "-U" "${INPUT_REMOTE_USER}"
+    "-P" "${INPUT_REMOTE_PORT}"
+    "-n" "${INPUT_APP_NAME}"
+)
 
 if [ -n "$INPUT_PRODUCTION" ]; then
     _args=("${_args[@]}" "--segment" "production")

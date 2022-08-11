@@ -4,13 +4,6 @@ import argparse
 import os
 import subprocess
 
-secrets = {
-    "DEPLOY_HOST": os.environ["INPUT_REMOTE_HOST"],
-    "DEPLOY_USER": os.environ["INPUT_REMOTE_USER"],
-    "DEPLOY_PORT": os.environ.get("INPUT_REMOTE_PORT", "22"),
-}
-
-
 parser = argparse.ArgumentParser(description="Build and deploy DECAF App")
 
 parser.add_argument(
@@ -29,11 +22,38 @@ parser.add_argument(
     required=True,
 )
 
+parser.add_argument(
+    "-H",
+    "--deploy-host",
+    help="Deploy host",
+    required=True,
+)
+
+parser.add_argument(
+    "-U",
+    "--deploy-user",
+    help="Deploy user",
+    required=True,
+)
+
+parser.add_argument(
+    "-P",
+    "--deploy-port",
+    help="Deploy port (default: 22)",
+    required=True,
+    default="22",
+)
+
 args = parser.parse_args()
+
+DEPLOY_HOST = args.deploy_host
+DEPLOY_USER = args.deploy_user
+DEPLOY_PORT = args.deploy_port
 
 segments = args.segment  # ['production', 'staging', 'v0.0.1']
 app_name = args.app_name  # 'some-report-app'
 
+# https://docs.python.org/3/library/subprocess.html#module-subprocess
 subprocess.run(["yarn", "install"], check=True)
 
 deploy_urls = []
@@ -62,16 +82,16 @@ for segment in segments:
     ## Deploy:
     print("Deploying...")
 
-    remote_path = f"/data/websites/{secrets['DEPLOY_HOST']}/htdocs{url_path}"
+    remote_path = f"/data/websites/{DEPLOY_HOST}/htdocs{url_path}"
     subprocess.run(
         [
             "rsync",
             "-avzr",
             "--delete",
             f"--rsync-path=mkdir -p {remote_path} && rsync",
-            f"-e ssh -o StrictHostKeyChecking=no -p {secrets['DEPLOY_PORT']}",
+            f"-e ssh -o StrictHostKeyChecking=no -p {DEPLOY_PORT}",
             out_path,
-            f"{secrets['DEPLOY_USER']}@{secrets['DEPLOY_HOST']}:{remote_path}",
+            f"{DEPLOY_USER}@{DEPLOY_HOST}:{remote_path}",
         ],
         check=True,
     )
