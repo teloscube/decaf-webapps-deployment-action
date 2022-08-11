@@ -44,7 +44,7 @@ jobs:
 
       - name: "Build and Deploy"
         id: build
-        uses: actions/decaf-webapps-deployment-action@v1
+        uses: teloscube/decaf-webapps-deployment-action
         with:
           app_name: demo-app
           production: true
