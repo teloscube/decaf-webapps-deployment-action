@@ -34,7 +34,7 @@ args = parser.parse_args()
 segments = args.segment  # ['production', 'staging', 'v0.0.1']
 app_name = args.app_name  # 'some-report-app'
 
-subprocess.run(["yarn", "install"])
+subprocess.run(["yarn", "install"], check=True)
 
 deploy_urls = []
 
@@ -49,7 +49,9 @@ for segment in segments:
     print("Building...")
 
     ## Start building:
-    subprocess.run(["yarn", "build"], env={**os.environ, "PUBLIC_URL": url_path})
+    subprocess.run(
+        ["yarn", "build"], env={**os.environ, "PUBLIC_URL": url_path}, check=True
+    )
     subprocess.run(
         f"mkdir -p {out_path} && cp -R build/** {out_path}",
         shell=True,
@@ -70,7 +72,8 @@ for segment in segments:
             f"-e ssh -o StrictHostKeyChecking=no -p {secrets['DEPLOY_PORT']}",
             out_path,
             f"{secrets['DEPLOY_USER']}@{secrets['DEPLOY_HOST']}:{remote_path}",
-        ]
+        ],
+        check=True,
     )
 
     deploy_urls.append(url_path)
