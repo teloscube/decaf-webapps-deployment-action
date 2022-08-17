@@ -45,26 +45,19 @@ parser.add_argument(
     default="22",
 )
 
-parser.add_argument(
-    "--upload-to-sentry",
-    help="Upload sourcemaps to Sentry",
-    action=argparse.BooleanOptionalAction,
-    default=False,
-    required=False,
-)
-
-parser.add_argument(
-    "--sentry-token",
-    help="Sentry token",
-    required=False,
-)
+parser.add_argument("--sentry-org", required=False)
+parser.add_argument("--sentry-project", required=False)
+parser.add_argument("--sentry-token", required=False)
 
 args = parser.parse_args()
 
 DEPLOY_HOST = args.deploy_host
 DEPLOY_USER = args.deploy_user
 DEPLOY_PORT = args.deploy_port
+
 SENTRY_AUTH_TOKEN = args.sentry_token
+SENTRY_ORG = args.sentry_org
+SENTRY_PROJECT = args.sentry_project
 
 segments = args.segment  # ['production', 'staging', 'v0.0.1']
 app_name = args.app_name  # 'some-report-app'
@@ -105,17 +98,18 @@ for segment in segments:
         print("Uploading release to Sentry...")
         version = get_version_from_package_json()
         cmd_base = ["yarn", "run", "sentry-cli", "releases"]
+        env = {
+            "SENTRY_ORG": SENTRY_ORG,
+            "SENTRY_PROJECT": SENTRY_PROJECT,
+            "SENTRY_AUTH_TOKEN": SENTRY_AUTH_TOKEN,
+        }
         cmds = [
             cmd_base + ["new", version],
             cmd_base + ["files", version, "upload-sourcemaps", out_path],
             cmd_base + ["finalize", version],
         ]
         for cmd in cmds:
-            subprocess.run(
-                cmd,
-                check=True,
-                environ={**os.environ, "SENTRY_AUTH_TOKEN": SENTRY_AUTH_TOKEN},
-            )
+            subprocess.run(cmd, check=True, environ={**os.environ, **env})
 
     ## Deploy:
     print("Deploying...")

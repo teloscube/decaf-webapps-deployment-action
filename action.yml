@@ -21,31 +21,33 @@ inputs:
     description: "Deployment from a tag or version"
     required: false
   remote_host:
-    description: 'The remote host'
+    description: "The remote host"
     required: true
   remote_user:
-    description: 'The remote user'
+    description: "The remote user"
     required: true
   remote_key:
-    description: 'The remote key'
+    description: "The remote key"
     required: true
   remote_port:
-    description: 'The remote port'
+    description: "The remote port"
     required: false
     default: 22
-  upload_to_sentry:
-    description: 'Upload sourcemaps to Sentry'
+  sentry_org:
+    description: "The sentry organization"
     required: false
-    default: false
+  sentry_project:
+    description: "The sentry project"
+    required: false
   sentry_token:
-    description: 'The sentry token to upload the sourcemaps'
+    description: "The sentry token to upload the sourcemaps"
     required: false
 runs:
   using: "composite"
   steps:
     - uses: actions/setup-python@v4
       with:
-        python-version: '3.10'
+        python-version: "3.10"
 
     - name: Install rsync
       id: install_rsync
@@ -66,7 +68,8 @@ runs:
         INPUT_REMOTE_USER: ${{ inputs.remote_user }}
         INPUT_REMOTE_PORT: ${{ inputs.remote_port }}
         INPUT_REMOTE_KEY: ${{ inputs.remote_key }}
-        INPUT_UPLOAD_TO_SENTRY: ${{ inputs.upload_to_sentry }}
+        INPUT_SENTRY_ORG: ${{ inputs.sentry_org }}
+        INPUT_SENTRY_PROJECT: ${{ inputs.sentry_project }}
         INPUT_SENTRY_TOKEN: ${{ inputs.sentry_key }}
 
     - name: "Comment on PR"

@@ -11,6 +11,29 @@ Set the following secrets in your repository or organization settings:
 - `DEPLOY_USER`: The username of the remote server.
 - `DEPLOY_KEY`: The private key of the remote server.
 
+## Required Parameters
+
+- `app_name`: The name of the app to build.
+- `remote_host`: The hostname of the remote server.
+- `remote_user`: The username of the remote server.
+- `remote_key`: The private for the the remote server.
+
+## Optional Parameters
+
+
+- `sentry_org`: The Sentry organization to use for sourcemap uploading.
+- `sentry_project`: The Sentry project to use for sourcemap uploading.
+- `sentry_token`: The Sentry token to use for sourcemap uploading.
+
+
+## Deployment Type Arguments
+
+There are four types of deployment: `production`, `staging`, `preview` and `version`.
+
+1. `production` and `staging` are both based on the `main` branch.
+2. `version` is also based on the `main` branch but is deployed to a different path (e.g: `v.0.1.0`)
+3. `preview` is also a boolean flag. When this is true, the deployment is deployed to a path that is like `preview-XXX` where `XXX` is the pull request number.
+
 ## Example Usage
 
 ```yml
@@ -54,7 +77,8 @@ jobs:
           remote_host: ${{ secrets.DEPLOY_HOST }}
           remote_user: ${{ secrets.DEPLOY_USER }}
           remote_key: ${{ secrets.DEPLOY_KEY }}
-          upload_to_sentry: true
+          sentry_org: teloscube
+          sentry_project: demo-app
           sentry_token: ${{ secrets.SENTRY_AUTH_TOKEN }}
 ```
 
