@@ -90,7 +90,7 @@ for segment in segments:
         ["yarn", "build"], env={**os.environ, "PUBLIC_URL": url_path}, check=True
     )
     subprocess.run(["mkdir", "-p", out_path], check=True)
-    subprocess.run(["cp", "-R", "build/**", out_path], check=True)
+    subprocess.run(f"cp -R build/** {out_path}", check=True, shell=True)
 
     # upload release to sentry
     if SENTRY_ORG and SENTRY_PROJECT and SENTRY_AUTH_TOKEN:
