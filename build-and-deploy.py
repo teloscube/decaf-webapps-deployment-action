@@ -108,7 +108,7 @@ for segment in segments:
             cmd_base + ["finalize", version],
         ]
         for cmd in cmds:
-            subprocess.run(cmd, check=True, environ={**os.environ, **env})
+            subprocess.run(cmd, check=True, env={**os.environ, **env})
 
     ## Deploy:
     print("Deploying...")
