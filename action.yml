@@ -70,7 +70,7 @@ runs:
         INPUT_REMOTE_KEY: ${{ inputs.remote_key }}
         INPUT_SENTRY_ORG: ${{ inputs.sentry_org }}
         INPUT_SENTRY_PROJECT: ${{ inputs.sentry_project }}
-        INPUT_SENTRY_TOKEN: ${{ inputs.sentry_key }}
+        INPUT_SENTRY_TOKEN: ${{ inputs.sentry_token }}
 
     - name: "Comment on PR"
       uses: actions/github-script@v6
