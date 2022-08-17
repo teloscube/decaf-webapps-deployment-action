@@ -27,5 +27,8 @@ fi
 if [ -n "$INPUT_VERSION" ]; then
     _args=("${_args[@]}" "--segment" "${INPUT_VERSION}")
 fi
+if [ -n "$INPUT_SENTRY_TOKEN" ] && [ -n "$INPUT_UPLOAD_TO_SENTRY" ]; then
+    _args=("${_args[@]}" "--upload-to-sentry" "--sentry-token" "${INPUT_SENTRY_TOKEN}")
+fi
 
 exec "${GITHUB_ACTION_PATH}/build-and-deploy.py" "${_args[@]}"

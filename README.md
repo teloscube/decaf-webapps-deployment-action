@@ -54,6 +54,8 @@ jobs:
           remote_host: ${{ secrets.DEPLOY_HOST }}
           remote_user: ${{ secrets.DEPLOY_USER }}
           remote_key: ${{ secrets.DEPLOY_KEY }}
+          upload_to_sentry: true
+          sentry_token: ${{ secrets.SENTRY_AUTH_TOKEN }}
 ```
 
 ## Outputs

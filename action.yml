@@ -33,6 +33,13 @@ inputs:
     description: 'The remote port'
     required: false
     default: 22
+  upload_to_sentry:
+    description: 'Upload sourcemaps to Sentry'
+    required: false
+    default: false
+  sentry_token:
+    description: 'The sentry token to upload the sourcemaps'
+    required: false
 runs:
   using: "composite"
   steps:
@@ -59,6 +66,8 @@ runs:
         INPUT_REMOTE_USER: ${{ inputs.remote_user }}
         INPUT_REMOTE_PORT: ${{ inputs.remote_port }}
         INPUT_REMOTE_KEY: ${{ inputs.remote_key }}
+        INPUT_UPLOAD_TO_SENTRY: ${{ inputs.upload_to_sentry }}
+        INPUT_SENTRY_TOKEN: ${{ inputs.sentry_key }}
 
     - name: "Comment on PR"
       uses: actions/github-script@v6
