@@ -61,7 +61,6 @@ SENTRY_PROJECT = args.sentry_project
 
 segments = args.segment  # ['production', 'staging', 'v0.0.1']
 app_name = args.app_name  # 'some-report-app'
-upload_release = args.upload_to_sentry
 
 
 def get_version_from_package_json():
@@ -94,7 +93,7 @@ for segment in segments:
     subprocess.run(["cp", "-R", "build/**", out_path], check=True)
 
     # upload release to sentry
-    if upload_release and SENTRY_AUTH_TOKEN:
+    if SENTRY_ORG and SENTRY_PROJECT and SENTRY_AUTH_TOKEN:
         print("Uploading release to Sentry...")
         version = get_version_from_package_json()
         cmd_base = ["yarn", "run", "sentry-cli", "releases"]
