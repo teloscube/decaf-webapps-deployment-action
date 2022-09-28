@@ -20,11 +20,9 @@ Set the following secrets in your repository or organization settings:
 
 ## Optional Parameters
 
-
 - `sentry_org`: The Sentry organization to use for sourcemap uploading.
 - `sentry_project`: The Sentry project to use for sourcemap uploading.
 - `sentry_token`: The Sentry token to use for sourcemap uploading.
-
 
 ## Deployment Type Arguments
 
@@ -70,6 +68,7 @@ jobs:
         uses: teloscube/decaf-webapps-deployment-action
         with:
           app_name: demo-app
+          deployment_subdomain: "sandbox.dev"
           production: true
           staging: true
           preview: true
