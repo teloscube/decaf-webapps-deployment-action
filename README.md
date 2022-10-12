@@ -68,7 +68,7 @@ jobs:
         uses: teloscube/decaf-webapps-deployment-action
         with:
           app_name: demo-app
-          deployment_subdomain: "sandbox.dev"
+          deployment_domain: "sandbox.dev.decafhub.com"
           production: true
           staging: true
           preview: true

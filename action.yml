@@ -20,10 +20,10 @@ inputs:
   version:
     description: "Deployment from a tag or version"
     required: false
-  deployment_subdomain:
-    description: "Subdomain part for the app URL. The xxx part where the address is xxx.decafhub.com. Default is sandbox.dev"
+  deployment_domain:
+    description: "Domain of the app URL. Default is sandbox.dev.decafhub.com"
     required: false
-    default: "sandbox.dev"
+    default: "sandbox.dev.decafhub.com"
   remote_host:
     description: "The remote host"
     required: true
@@ -80,7 +80,7 @@ runs:
       uses: actions/github-script@v6
       env:
         DEPLOY_URLS: ${{steps.build.outputs.urlpaths}}
-        APP_SUBDOMAIN: ${{ inputs.deployment_subdomain }}
+        APP_DOMAIN: ${{ inputs.deployment_domain }}
       if: ${{ github.event_name == 'pull_request' && (github.event.action == 'opened' || github.event.action == 'reopened') }}
       with:
         script: |
@@ -89,5 +89,5 @@ runs:
             repo: { owner, repo },
           } = context;
           process.env.DEPLOY_URLS.split('||').forEach(path => {
-            github.rest.issues.createComment({ issue_number, owner, repo, body: `🚀  Deploy Preview: https://${process.env.APP_SUBDOMAIN}.decafhub.com${path}` });
+            github.rest.issues.createComment({ issue_number, owner, repo, body: `🚀  Deploy Preview: https://${process.env.APP_DOMAIN}${path}` });
           });
