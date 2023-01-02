@@ -89,8 +89,14 @@ for segment in segments:
     subprocess.run(
         ["yarn", "build"], env={**os.environ, "PUBLIC_URL": url_path}, check=True
     )
+
     subprocess.run(["mkdir", "-p", out_path], check=True)
-    subprocess.run(f"cp -R build/** {out_path}", check=True, shell=True)
+
+    if os.path.exists("build") and os.listdir("build"):
+        subprocess.run(f"cp -R build/** {out_path}", check=True, shell=True)
+    
+    if not os.path.exists(f"{out_path}") or not os.listdir(f"{out_path}"):
+        raise Exception("Dist folder not found or empty. Aborting.")
 
     # upload release to sentry
     if SENTRY_ORG and SENTRY_PROJECT and SENTRY_AUTH_TOKEN:
