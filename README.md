@@ -23,6 +23,7 @@ Set the following secrets in your repository or organization settings:
 - `sentry_org`: The Sentry organization to use for sourcemap uploading.
 - `sentry_project`: The Sentry project to use for sourcemap uploading.
 - `sentry_token`: The Sentry token to use for sourcemap uploading.
+- `build_folder`: The folder to deploy. Default is `build`.
 
 ## Deployment Type Arguments
 
@@ -79,6 +80,7 @@ jobs:
           sentry_org: teloscube
           sentry_project: demo-app
           sentry_token: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          build_folder: "build"
 ```
 
 ## Outputs

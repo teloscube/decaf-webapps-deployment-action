@@ -32,5 +32,8 @@ if [ -n "$INPUT_SENTRY_TOKEN" ] && [ -n "$INPUT_SENTRY_ORG" ] && [ -n "$INPUT_SE
     _args=("${_args[@]}" "--sentry-org" "${INPUT_SENTRY_ORG}")
     _args=("${_args[@]}" "--sentry-project" "${INPUT_SENTRY_PROJECT}")
 fi
+if [ -n "$INPUT_BUILD_FOLDER" ]; then
+    _args=("${_args[@]}" "--build-folder" "${INPUT_BUILD_FOLDER}")
+fi
 
 exec "${GITHUB_ACTION_PATH}/build-and-deploy.py" "${_args[@]}"

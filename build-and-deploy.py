@@ -49,6 +49,8 @@ parser.add_argument("--sentry-org", required=False)
 parser.add_argument("--sentry-project", required=False)
 parser.add_argument("--sentry-token", required=False)
 
+parser.add_argument('--build-folder', required=False, default="build")
+
 args = parser.parse_args()
 
 DEPLOY_HOST = args.deploy_host
@@ -61,7 +63,7 @@ SENTRY_PROJECT = args.sentry_project
 
 segments = args.segment  # ['production', 'staging', 'v0.0.1']
 app_name = args.app_name  # 'some-report-app'
-
+build_folder = args.build_folder # default is 'build'
 
 def get_version_from_package_json():
     with open("package.json", "r") as f:
@@ -100,8 +102,8 @@ for segment in segments:
 
     subprocess.run(["mkdir", "-p", out_path], check=True)
 
-    if os.path.exists("build") and os.listdir("build"):
-        subprocess.run(f"cp -R build/** {out_path}", check=True, shell=True)
+    if os.path.exists(build_folder) and os.listdir(build_folder):
+        subprocess.run(f"cp -R {build_folder}/** {out_path}", check=True, shell=True)
     
     if not os.path.exists(f"{out_path}") or not os.listdir(f"{out_path}"):
         raise Exception("Dist folder not found or empty. Aborting.")
