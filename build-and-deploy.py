@@ -69,9 +69,17 @@ def get_version_from_package_json():
         data_json = json.loads(data)
         return data_json["version"]
 
+def get_packager():
+    if os.path.exists("yarn.lock"):
+        return "yarn"
+    else:
+        return "npm"
+
+packager = get_packager()
+
 
 # https://docs.python.org/3/library/subprocess.html#module-subprocess
-subprocess.run(["yarn", "install"], check=True)
+subprocess.run([packager, "install"], check=True)
 
 deploy_urls = []
 
@@ -87,7 +95,7 @@ for segment in segments:
 
     ## Start building:
     subprocess.run(
-        ["yarn", "build"], env={**os.environ, "PUBLIC_URL": url_path}, check=True
+        [packager, "run", "build"], env={**os.environ, "PUBLIC_URL": url_path}, check=True
     )
 
     subprocess.run(["mkdir", "-p", out_path], check=True)
@@ -102,7 +110,7 @@ for segment in segments:
     if SENTRY_ORG and SENTRY_PROJECT and SENTRY_AUTH_TOKEN:
         print("Uploading release to Sentry...")
         version = get_version_from_package_json()
-        cmd_base = ["yarn", "run", "sentry-cli", "releases"]
+        cmd_base = [packager, "run", "sentry-cli", "releases"]
         env = {
             "SENTRY_ORG": SENTRY_ORG,
             "SENTRY_PROJECT": SENTRY_PROJECT,
