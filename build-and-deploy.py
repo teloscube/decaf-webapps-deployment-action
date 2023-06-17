@@ -147,5 +147,10 @@ for segment in segments:
 
 
 ## Set url paths:
-print(f"::set-output name=urlpaths::{'||'.join(deploy_urls)}")
+name = 'urlpaths'
+value = '||'.join(deploy_urls)
+
+with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
+    print(f"{name}={value}", file=f)
+
 print("Done!")
