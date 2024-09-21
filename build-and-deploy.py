@@ -112,7 +112,7 @@ for segment in segments:
     if SENTRY_ORG and SENTRY_PROJECT and SENTRY_AUTH_TOKEN:
         print("Uploading release to Sentry...")
         version = get_version_from_package_json()
-        cmd_base = [packager, "run", "sentry-cli", "releases"]
+        cmd_base = ["npx", "sentry-cli", "releases"]
         env = {
             "SENTRY_ORG": SENTRY_ORG,
             "SENTRY_PROJECT": SENTRY_PROJECT,
